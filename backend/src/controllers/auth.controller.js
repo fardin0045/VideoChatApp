@@ -42,9 +42,9 @@ export async function signup(req, res) {
         name: newUser.fullName,
         image: newUser.profilePic || '',
       });
-      console.log(`stream user created for ${newUser.fullName}`)
+      console.log(`stream user created for ${newUser.fullName}`);
     } catch (err) {
-         console.log('Error creating stream id')
+      console.log('Error creating stream id');
     }
 
     const token = jwt.sign(
@@ -98,4 +98,50 @@ export async function login(req, res) {
 export function logout(req, res) {
   res.clearCookie('jwt');
   res.status(200).json({ success: true, message: 'Logout Successfully' });
+}
+export async function onBoard(req, res) {
+  try {
+    const userId = req.user._id;
+    const { fullName, bio, nativeLanguage, learningLanguage, location } = req.body;
+
+    if (!fullName || !bio || !nativeLanguage || !learningLanguage || !location) {
+      return res.status(400).json({
+        message: 'All Fields Are required',
+        missingFields: [
+          !fullName && 'fullName',
+          !bio && 'bio',
+          !nativeLanguage && 'nativeLanguage',
+          !learningLanguage && 'learningLanguage',
+          !location && 'location',
+        ].filter(Boolean),
+      });
+    }
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      {
+        ...req.body,
+        isOnBoarded: true,
+      },
+      { new: true },
+    );
+
+    if (!updatedUser)
+      return res.status(404).json({ message: 'User not found' });
+
+    //update stream user info
+    try {
+      await upsertStreamUser({
+        id: updatedUser._id.toString(),
+        name: updatedUser.fullName,
+        image: updatedUser.profilePic || '',
+      });
+      console.log(`Stream user updated after onboarding for ${updatedUser.fullName}`)
+    } catch (error) {
+       console.log(`Error  updating user during  onboarding  ${error.message}`)
+    }
+
+    res.status(200).json({ success: true, user: updatedUser });
+  } catch (error) {
+    res.status(500).json({ message: 'Onboarding error', error });
+  }
 }
