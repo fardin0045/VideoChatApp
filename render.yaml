@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: videochatapp
+    env: node
+    plan: free
+    rootDir: .
+    buildCommand: npm run build
+    startCommand: npm start
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production

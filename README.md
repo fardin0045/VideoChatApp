@@ -138,6 +138,8 @@ In production, the Express server serves the built frontend from `frontend/dist`
 
 ## Deployment Notes
 
+- This repository includes a `render.yaml` blueprint for Render deployments.
+- Use the repository root as the service root so the top-level `package.json` is available.
 - Update the CORS origin in `backend/src/server.js` to match your deployed frontend URL.
 - Make sure your deployment environment sets `NODE_ENV=production` and the required secret variables.
 - If you deploy behind a reverse proxy, ensure cookies are forwarded correctly and HTTPS is enabled.
